@@ -1,0 +1,35 @@
+html, body {
+    width: 100%;
+    margin: 0;
+}
+
+.container {
+    padding: 64px;
+}
+
+.formatted-table {
+    width: 50%;
+    display: flex; 
+    justify-content: space-between; 
+}
+
+.dot {
+    height: 10px;
+    width: 10px;
+    margin-left: 8px;
+    border-radius: 50%;
+}
+
+.dot-in-progress {
+    background-color: green;
+}
+
+.dot-ended {
+    background-color: red;
+}
+
+@media screen and (max-width: 992px) {
+    .formatted-table {
+        width: 100%;
+    }
+}

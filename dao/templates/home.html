@@ -1,0 +1,153 @@
+{% extends '_base.html' %}
+
+{% load static %}
+
+{% block title %}
+    DAOMock - Homepage
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <div style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">
+                    Read Carefully
+                </h4>
+                <p>
+                    The following is a mock application that simulates the behavior of a simple Decentralized Autonomous Organization on the Algorand testnet blockchain. Within this application, users can create polls, cast their votes, and see the poll's final results.
+                </p>
+                <hr>
+                <p class="mb-0">
+                    DAOMock is a proof-of-concept application created as the final project of the <a href="https://algorand-school.github.io/algorand-school/">International School on Algorand Smart Contract</a>. It was created for demonstration purposes only and should never be used in a production environment.
+                </p>
+            </div>
+        </div>
+        <div style="margin-top: 16px;">
+            <h3>
+                Create a Poll
+            </h3>
+            <p>
+                Create a poll on the Algorand testnet blockchain.
+            </p>
+            <button type="button" class="btn btn-primary" onclick="redirectToCreatePoll();">
+                Create Poll
+            </button>
+        </div>
+        <div style="margin-top: 16px;">
+            <h3>
+                See Existing Polls
+            </h3>
+            <p>
+                Click on one of the existing polls to see its details. If the poll is currently in progress, you can cast your vote. Otherwise, you can see the poll's final results.
+            </p>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                            Poll Name: Poll #1 - 
+                            Poll Status: In Progress
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div>
+                                <div class="formatted-table">
+                                    <p>
+                                        Poll Name
+                                    </p>
+                                    <p>
+                                        Poll #1
+                                    </p>
+                                </div>
+                                <div class="formatted-table">
+                                    <p>
+                                        Poll Description
+                                    </p>
+                                    <p>
+                                        Lorem ipsum dolor sid amet
+                                    </p>
+                                </div>
+                                <div class="formatted-table">
+                                    <p>
+                                        Poll Status
+                                    </p>
+                                    <p>
+                                        In Progress
+                                    </p>
+                                </div>
+                                <div class="formatted-table">
+                                    <p>
+                                        End Date
+                                    </p>
+                                    <p>
+                                        18/08/2023
+                                    </p>
+                                </div>
+                            </div>
+                            <div style="  display:flex; justify-content: flex-end;">
+                                <button type="button" class="btn btn-primary" onclick="redirectToVotingPage(this);">
+                                    Vote
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Poll Name: Poll #2 - 
+                            Poll Status: Ended
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div>
+                                <div class="formatted-table">
+                                    <p>
+                                        Poll Name
+                                    </p>
+                                    <p>
+                                        Poll #2
+                                    </p>
+                                </div>
+                                <div class="formatted-table">
+                                    <p>
+                                        Poll Description
+                                    </p>
+                                    <p>
+                                        Lorem ipsum dolor sid amet
+                                    </p>
+                                </div>
+                                <div class="formatted-table">
+                                    <p>
+                                        Poll Status
+                                    </p>
+                                    <p>
+                                        Ended
+                                    </p>
+                                </div>
+                                <div class="formatted-table">
+                                    <p>
+                                        End Date
+                                    </p>
+                                    <p>
+                                        18/08/2021
+                                    </p>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content: flex-end;">
+                                <button type="button" class="btn btn-primary" onclick="redirectToResultsPage(this);">
+                                    Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js_import %}
+    <script src="{% static 'js/polls.js' %}"></script>
+{% endblock js_import %}

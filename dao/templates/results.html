@@ -1,0 +1,89 @@
+{% extends '_base.html' %}
+
+{% load static %}
+
+{% block title %}
+    DAOMock - Vote
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <div style="margin-top: 16px;">
+            <h3>
+                Results
+            </h3>
+            <p>
+                Results of the poll are showed in the following.
+            </p>
+            <hr>
+        </div>
+        <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+            <canvas id="results-chart" style="max-width: 400px; max-height: 400px;"></canvas>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <p>
+                Poll Name:
+            </p>
+            <p>
+                Poll #2
+            </p>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <p>
+                Poll Description:
+            </p>
+            <p>
+                Lorem ipsum dolor sid amet
+            </p>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <p>
+                Poll End Date:
+            </p>
+            <p>
+                18/08/2021
+            </p>
+        </div>
+        <div style="display: flex; justify-content: center;">
+            <h3>No has passed.</h3>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js_import %}
+    <script src="{% static 'js/polls.js' %}"></script>
+    <script>
+        var ctx = $("#results-chart").get(0).getContext("2d");
+        const data = {
+            labels: ["Yes", "No"],
+            datasets: [
+                {
+                    label: null,
+                    data: [3, 14], 
+                    backgroundColor: [
+                        "rgba(75, 192, 192, 0.4)",
+                        "rgba(255, 99, 132, 0.4)",
+                    ],
+                }
+            ]
+        }
+        const options = {
+            plugins: {
+                title: {
+                    display: true,
+                    text: "Poll #2"
+                },
+                legend: {
+                    display: false
+                }
+            }
+        }
+        new Chart(ctx, 
+            {
+                type: "bar", 
+                data: data,
+                options: options
+            }
+        );
+    </script>
+{% endblock js_import %}

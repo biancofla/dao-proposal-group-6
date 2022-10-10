@@ -5,3 +5,7 @@ Blockchains are naturally suited to implement decentralized voting systems. Howe
 The project's objective is to create a DAO with a limited number of participants that allows the creation of surveys and voting operations. Voting operations should be two-rounded and encrypted through the Open Vote Network protocol.
 
 The technical challenge we will face is implementing a DApp that allows users to create polls and vote within them. Also, in implementing the Open Vote Network protocol, we expect to encounter significant technical challenges in implementing non-interactive ZKPs.
+
+# Demo
+
+An interactive demo of the application is deployed at the following [link](https://dao-proposal-group-6.fly.dev/).

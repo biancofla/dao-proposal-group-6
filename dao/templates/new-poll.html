@@ -1,0 +1,65 @@
+{% extends '_base.html' %}
+
+{% load static %}
+
+{% block title %}
+    DAOMock - Create New Poll
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <div style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">
+                    Read Carefully
+                </h4>
+                <p>
+                    DAOMock does not keep track of your data. Mnemonic is only used to generate the key pair necessary to sign the transaction. No other operations are performed.
+                </p>
+            </div>
+        </div>
+        <div style="margin-top: 16px;">
+            <h3>
+                Create a Poll
+            </h3>
+            <p>
+                Create a poll on the Algorand testnet blockchain.
+            </p>
+            <hr>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <div class="form-group" style="width: 100%;">
+                <label for="poll-title">Poll name</label>
+                <input id="poll-title" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Enter the poll question.">
+            </div>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <div class="form-group" style="width: 100%;">
+                <label for="poll-description">Poll Description</label>
+                <textarea id="poll-description" class="form-control" rows="3" placeholder="Enter a brief explanation of the poll question."></textarea>
+            </div>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <div class="form-group" style="width: 100%;">
+                <label for="poll-end-date">Poll End Date</label>
+                <input id="poll-end-date" class="form-control" type="date"/>
+            </div>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <div class="form-group" style="width: 100%;">
+                <label for="poll-mnemonic">Mnemonic</label>
+                <textarea id="poll-mnemonic" class="form-control" rows="3" placeholder="Enter the mnemonic associated with your Algorand testnet account."></textarea>
+                <small  class="form-text text-muted">Mnemonic is only used to generate the key pair necessary to sign the transaction. No other operations are performed.</small>
+            </div>
+        </div>
+        <div style="display:flex; justify-content: flex-end;">
+            <button type="button" class="btn btn-primary" onclick="onCreatePoll();">
+                Create Poll
+            </button>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js_import %}
+    <script src="{% static 'js/polls.js' %}"></script>
+{% endblock js_import %}

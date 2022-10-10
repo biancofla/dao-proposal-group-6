@@ -1,0 +1,89 @@
+{% extends '_base.html' %}
+
+{% load static %}
+
+{% block title %}
+    DAOMock - Vote
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <div style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">
+                    Read Carefully
+                </h4>
+                <p>
+                    DAOMock does not keep track of your data. Mnemonic is only used to generate the key pair necessary to sign the transaction. No other operations are performed.
+                </p>
+            </div>
+        </div>
+        <div style="margin-top: 16px;">
+            <h3>
+                Vote 
+            </h3>
+            <p>
+                Opt-in, choose between the two options provided and vote.
+            </p>
+            <hr>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <p>
+                Poll Name:
+            </p>
+            <p>
+                Poll #1
+            </p>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <p>
+                Poll Description:
+            </p>
+            <p>
+                Lorem ipsum dolor sid amet
+            </p>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <p>
+                Poll End Date:
+            </p>
+            <p>
+                18/08/2023
+            </p>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <p>
+                Your Vote
+            </p>
+            <div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" value="true">
+                    <label class="form-check-label" for="inlineRadio1">Yes</label>
+                </div>
+                <div class="form-check form-check-inline" style="margin-right: 0;">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" value="false">
+                    <label class="form-check-label" for="inlineRadio2">No</label>
+                </div>
+            </div>
+        </div>
+        <div class="formatted-table" style="margin-bottom: 16px;">
+            <div class="form-group" style="width: 100%;">
+                <label for="poll-mnemonic">Mnemonic</label>
+                <textarea id="poll-mnemonic" class="form-control" rows="3" placeholder="Enter the mnemonic associated with your Algorand testnet account."></textarea>
+                <small  class="form-text text-muted">Mnemonic is only used to generate the key pair necessary to sign the transaction. No other operations are performed.</small>
+            </div>
+        </div>
+        <div style="display:flex; justify-content: flex-end;">
+            <button type="button" class="btn btn-primary" onclick="onOptIn();">
+                Opt-In
+            </button>
+            <button type="button" class="btn btn-primary" onclick="onVote();" style="margin-left: 16px;">
+                Vote
+            </button>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js_import %}
+    <script src="{% static 'js/polls.js' %}"></script>
+{% endblock js_import %}

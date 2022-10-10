@@ -18,7 +18,7 @@ McCorry et al. proposed a decentralized voting system based on the Ethereum bloc
 
 As discussed before, while there exist implementations of OVN over the Ethereum blockchain, to the best of our knowledge, there is no implementation of such a protocol in Algorand. The use of the Algorand blockchain could considerably improve the voting system proposed by McCorry et al. The costs per transaction would be much lower; overall, each voting process would involve negligible expense. In addition, the Algorand network has proven to be faster, more reliable, and more energy-efficient: an optimal platform for creating and managing online votes.
 
-The technical challenges we expect to face concern the development of an e-voting _Dentralized Application_ (from now on, it will be referred to as _DApp_) on Algorand with the anonymity feature of the voters and the votes that allows users to create polls and cast votes within these polls. Implementing the Open Vote Network protocol, we expect to encounter significant technical challenges in implementing non-interactive ZKPs.
+The technical challenges we expect to face concern the development of an e-voting _Decentralized Application_ (from now on, it will be referred to as _DApp_) on Algorand with the anonymity feature of the voters and the votes that allows users to create polls and cast votes within these polls. Implementing the Open Vote Network protocol, we expect to encounter significant technical challenges in implementing non-interactive ZKPs.
 
 ## References
 

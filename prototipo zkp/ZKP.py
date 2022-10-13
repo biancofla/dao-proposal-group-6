@@ -62,8 +62,9 @@ def inverso_mod(a, b):
 
 """Calcolo chiavi di voto"""
 xKey = (inverso_mod(p, gY) * inverso_mod(p, gZ) ) % p
-yKey = ( gX * inverso_mod(p, gZ) ) % q
+yKey = ( gX * inverso_mod(p, gZ) ) % p
 zKey = ( gX * gY ) %p
+
 
 
 """Primo partecipante vota SI (v = 1), e crea la ZKP """
@@ -94,3 +95,33 @@ def verify_voto( commit, key, voto, a1, b1, a2, b2, d1, r1,d2,r2):
     return (check1 and check2 and check3 and check4 and check5)
 
 print(verify_voto(gX,xKey, xVoto, a1X,b1X,a2X, b2X, dRndX,rRndX,d2X,r2X))
+
+"""Secondo partecipante vota NO (v= 0) e crea la ZKP (diversa)"""
+yVoto = (pow( yKey, y , p) ) % p
+wRndY, rRndY, dRndY = randint(1,q-1) ,randint(1,q-1),randint(1,q-1)
+a1Y = pow(g, wRndY,p) %p
+b1Y = pow(yKey, wRndY, p) %p
+a2Y =  (pow( g, rRndY, p) * pow(gY, dRndY, p) )%p
+b2Y = (pow(yKey, rRndY, p)* pow( ( yVoto* inverso_mod(p,g)), dRndY, p) )%p
+
+yChalVoto = int(hashlib.sha256(str([gY, yKey, yVoto, a1Y, b1Y, a2Y, b2Y]).encode('utf-8')).hexdigest(), 16) % q
+
+d2Y = (yChalVoto - dRndY ) %q
+r2Y = (wRndY - (y * d2Y) ) %q
+print(verify_voto(gY,yKey, yVoto, a1Y,b1Y,a2Y, b2Y,d2Y,r2Y,dRndY,rRndY))
+
+"""Terzo voto SI, senza ZKP """
+zVoto = (pow( zKey, z , p) * g ) % p
+
+
+""" Conteggio voti """
+
+def conteggio():
+    tot = (xVoto * yVoto * zVoto) % p
+    for i in range (0,4):
+        check = ( tot == pow(g, i, p) )
+        print (tot, pow(g,i , p))
+        if check:
+            return i
+
+print ( conteggio() )

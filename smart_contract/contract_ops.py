@@ -14,7 +14,7 @@ import base64
 import time
 
 algod_address = "https://testnet-algorand.api.purestake.io/ps2"
-algod_token   = "<PURESTAKE_API_TOKEN>"
+algod_token   = "WaAZx2zEW697U4maXB6LT9qK3WEIBh8rjgD7uxc0"
 
 algod_client = algod.AlgodClient(
     algod_token, 
@@ -51,8 +51,8 @@ def deploy_contract(passphrase):
         clear_result  = algod_client.compile(clear) 
         clear_program = base64.b64decode(clear_result["result"])
 
-        local_schema  = transaction.StateSchema(num_uints=0, num_byte_slices=1)
-        global_schema = transaction.StateSchema(num_uints=6, num_byte_slices=1)
+        local_schema  = transaction.StateSchema(num_uints=0 , num_byte_slices=1)
+        global_schema = transaction.StateSchema(num_uints=14, num_byte_slices=1)
 
         sp = algod_client.suggested_params()
 
@@ -66,11 +66,18 @@ def deploy_contract(passphrase):
         vote_begin         = int(time.mktime(vote_begin.timetuple()))
         vote_end           = int(time.mktime(vote_end.timetuple()))
 
+        p   = 59
+        q   = 29
+        gen = 3
+
         app_args = [
             registration_begin, 
             registration_end, 
             vote_begin, 
-            vote_end, 
+            vote_end,
+            p,
+            q,
+            gen
         ]
     
         app_create_txn = transaction.ApplicationCreateTxn(
@@ -109,12 +116,18 @@ def opt_in(passphrase, app_id):
     private_key = mnemonic.to_private_key(passphrase)
     sender      = account.address_from_private_key(private_key)
 
+    global_state = get_global_state(app_id)
+    print(global_state)
+
+    return -1
+
     try:
         sp = algod_client.suggested_params()
         app_optin_txn = transaction.ApplicationOptInTxn(
             sender=sender,
             sp=sp, 
-            index=app_id
+            index=app_id,
+            app_args=app_args
         )
 
         signed_app_optin_txn = app_optin_txn.sign(private_key)
@@ -171,6 +184,17 @@ def vote(passphrase, app_id, preference):
     except error.AlgodHTTPError as e:
         print(e)
         return -1
+
+def get_global_state(app_id):
+    global_state = {}
+    try:
+        app_info = algod_client.application_info(app_id)
+
+        global_state = app_info["params"]["global-state"]
+    except error.AlgodHTTPError as e:
+        print(e)
+    finally:
+        return global_state
 
 def get_voting_results(app_id):
     """
@@ -235,12 +259,15 @@ def test():
     for p in partecipant_public_keys: print(p)
 
     app_id = deploy_contract(creator_passphrase)
+    print(app_id)
     if app_id > -1:
         print(f"Smart Contract succesfully created with App ID {app_id}.")
 
         # Opt-In all the partecipants.
         for passphrase, public_key in zip(partecipant_passphrases, partecipant_public_keys):
             res = opt_in(passphrase, app_id)
+
+            asd
             if res > -1: 
                 print(f"{public_key} opt-in performed succesfully.")
             else:
@@ -260,6 +287,14 @@ def test():
                 
         results = get_voting_results(app_id)
         print(results)
+
+def generate_round_1_proof():
+    x = random.randint(1, q - 1)
+    gX = pow(g, x, p) 
+    rnd = random.randint(1, q - 1)
+    gRnd = pow(g, rnd, p)
+    xChal = int(hashlib.sha256(str([g, gX, gRnd]).encode('utf-8')).hexdigest(), 16) % q
+    xProof = (rnd - xChal * x) % q
 
 if __name__ == "__main__":
     test()

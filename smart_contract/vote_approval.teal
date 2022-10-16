@@ -1,0 +1,321 @@
+#pragma version 4
+txn ApplicationID
+int 0
+==
+bnz main_l16
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l15
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l14
+txn OnCompletion
+int CloseOut
+==
+bnz main_l11
+txn OnCompletion
+int OptIn
+==
+bnz main_l10
+txna ApplicationArgs 0
+byte "vote"
+==
+bnz main_l7
+err
+main_l7:
+global LatestTimestamp
+byte "VoteBegin"
+app_global_get
+>=
+global LatestTimestamp
+byte "VoteEnd"
+app_global_get
+<=
+&&
+assert
+int 0
+global CurrentApplicationID
+byte "voted"
+app_local_get_ex
+store 1
+store 0
+load 1
+bnz main_l9
+txna ApplicationArgs 1
+txna ApplicationArgs 1
+app_global_get
+int 1
++
+app_global_put
+int 0
+byte "voted"
+txna ApplicationArgs 1
+app_local_put
+int 1
+return
+main_l9:
+int 0
+return
+main_l10:
+global LatestTimestamp
+byte "RegBegin"
+app_global_get
+>=
+global LatestTimestamp
+byte "RegEnd"
+app_global_get
+<=
+&&
+txna ApplicationArgs 0
+btoi
+txna ApplicationArgs 1
+btoi
+txna ApplicationArgs 2
+btoi
+callsub verifyr1_3
+&&
+assert
+int 1
+return
+main_l11:
+int 0
+global CurrentApplicationID
+byte "voted"
+app_local_get_ex
+store 1
+store 0
+global Round
+byte "VoteEnd"
+app_global_get
+<=
+load 1
+&&
+bnz main_l13
+main_l12:
+int 1
+return
+main_l13:
+load 0
+load 0
+app_global_get
+int 1
+-
+app_global_put
+b main_l12
+main_l14:
+txn Sender
+byte "Creator"
+app_global_get
+==
+return
+main_l15:
+txn Sender
+byte "Creator"
+app_global_get
+==
+return
+main_l16:
+byte "Creator"
+txn Sender
+app_global_put
+txn NumAppArgs
+int 7
+==
+assert
+byte "RegBegin"
+txna ApplicationArgs 0
+btoi
+app_global_put
+byte "RegEnd"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "VoteBegin"
+txna ApplicationArgs 2
+btoi
+app_global_put
+byte "VoteEnd"
+txna ApplicationArgs 3
+btoi
+app_global_put
+byte "p"
+txna ApplicationArgs 4
+btoi
+app_global_put
+byte "q"
+txna ApplicationArgs 5
+btoi
+app_global_put
+byte "gen"
+txna ApplicationArgs 6
+btoi
+app_global_put
+byte "CurrentIndex"
+int 0
+app_global_put
+int 1
+return
+
+// add_mod
+addmod_0:
+store 14
+store 13
+store 12
+load 13
+int 0
+==
+bnz addmod_0_l4
+load 14
+load 13
+-
+store 15
+load 12
+load 15
+>=
+bnz addmod_0_l3
+load 14
+load 15
+-
+load 12
++
+retsub
+addmod_0_l3:
+load 12
+load 15
+-
+retsub
+addmod_0_l4:
+load 12
+retsub
+
+// mult_mod
+multmod_1:
+store 8
+store 7
+store 6
+load 6
+store 9
+load 7
+store 10
+int 0
+store 11
+multmod_1_l1:
+load 10
+int 0
+>
+bz multmod_1_l5
+load 10
+int 2
+%
+int 1
+==
+bnz multmod_1_l4
+multmod_1_l3:
+load 9
+load 9
+load 8
+callsub addmod_0
+store 9
+load 10
+int 2
+/
+store 10
+b multmod_1_l1
+multmod_1_l4:
+load 11
+load 9
+load 8
+callsub addmod_0
+store 11
+b multmod_1_l3
+multmod_1_l5:
+load 11
+retsub
+
+// pow_mod
+powmod_2:
+store 18
+store 17
+store 16
+load 16
+store 19
+load 17
+store 20
+int 1
+store 21
+powmod_2_l1:
+load 20
+int 0
+>
+bz powmod_2_l5
+load 20
+int 2
+%
+int 1
+==
+bnz powmod_2_l4
+powmod_2_l3:
+load 19
+load 19
+load 18
+callsub multmod_1
+store 19
+load 20
+int 2
+/
+store 20
+b powmod_2_l1
+powmod_2_l4:
+load 21
+load 19
+load 18
+callsub multmod_1
+store 21
+b powmod_2_l3
+powmod_2_l5:
+load 21
+retsub
+
+// verify_r1
+verifyr1_3:
+store 4
+store 3
+store 2
+byte "gen"
+app_global_get
+load 2
+itob
+concat
+load 3
+itob
+concat
+sha256
+btoi
+byte "q"
+app_global_get
+%
+store 5
+byte "gen"
+app_global_get
+load 4
+byte "p"
+app_global_get
+callsub powmod_2
+load 2
+load 5
+byte "p"
+app_global_get
+callsub powmod_2
+byte "p"
+app_global_get
+callsub multmod_1
+load 3
+==
+bnz verifyr1_3_l2
+int 0
+retsub
+verifyr1_3_l2:
+int 1
+retsub

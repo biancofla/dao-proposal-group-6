@@ -46,8 +46,14 @@ def approval_program():
                 )
             )
         ),
-        App.globalPut(Bytes("CurrentIndex"), App.globalGet(Bytes("CurrentIndex")) + Int(1)),
-        App.globalPut(App.globalGet(Bytes("CurrentIndex")), Txn.application_args[0]),
+        #App.globalPut(
+        #    Bytes("CurrentIndex"), 
+        #    App.globalGet(Bytes("CurrentIndex")) + Int(1)
+        #),
+        #App.globalPut(
+        #    App.globalGet(Bytes("CurrentIndex")), 
+        #    Txn.application_args[0]
+        #),
         Return(Int(1))
     ])
 
@@ -230,24 +236,25 @@ def inverse_mod(b, mod):
 def verify_r1(claim_id, claim_rnd, proof):
     chal = ScratchVar(TealType.uint64)
 
-    p_   = ScratchVar(TealType.uint64)
-    q_   = ScratchVar(TealType.uint64)
-    gen_ = ScratchVar(TealType.uint64)
+    p   = App.globalGet(Bytes("p"))
+    q   = App.globalGet(Bytes("q"))
+    gen = App.globalGet(Bytes("gen"))
 
     return Seq([
-        p_.store(App.globalGet(Bytes("p"))),
-        q_.store(App.globalGet(Bytes("q"))),
-        gen_.store(App.globalGet(Bytes("gen"))),
-        chal.store(Btoi(Sha256(Concat(Bytes(gen_.load()), Bytes(claim_id), Bytes(claim_rnd)))) % q_.load()),
+        chal.store(
+            Btoi(Sha256(Concat(gen, Itob(claim_id), Itob(claim_rnd)))) % q
+        ),
         If(
-            Eq(mult_mod(pow_mod(gen_.load(), proof, p_.load()), pow_mod(claim_id, chal.load(), p_.load()), claim_rnd))
+            Eq(
+                mult_mod(pow_mod(gen, proof, p), pow_mod(claim_id, chal.load(), p), p),
+                claim_rnd
+            )
         ).Then(
             Return(Int(1))
         ).Else(
             Return(Int(0))
         )
     ])
-
 
 if __name__ == "__main__":
     with open('vote_approval.teal', 'w') as f:

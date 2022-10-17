@@ -2,6 +2,13 @@
 
 Blockchains are naturally suited to implement decentralized voting systems. However, given the public nature of the blockchain, it is not easy to ensure the anonymity of voting and voters. We want to address these problems by implementing the Open Vote Network protocol.
 
+## Smart Contract Specifications
+
+The developed protocol consists of three phases: 
+- the first phase of opt-in and registration of participants in which public keys are saved, and their knowledge of the private key is verified through a ZKP; 
+- the second phase of voting in which each participant submits an encrypted vote along with proof of vote validity verified later by contract;
+- a final phase of vote counting that makes the resulting public without revealing the votes of individual participants.
+
 ## State of The Art
 
 The research carried out by McCorry et al. [1] discusses secure methods to conduct e-voting in various settings.
@@ -20,6 +27,15 @@ As discussed before, while there exist implementations of OVN over the Ethereum 
 
 The technical challenges we expect to face concern the development of an e-voting _Decentralized Application_ (from now on, it will be referred to as _DApp_) on Algorand with the anonymity feature of the voters and the votes that allows users to create polls and cast votes within these polls. Implementing the Open Vote Network protocol, we expect to encounter significant technical challenges in implementing non-interactive ZKPs.
 
+## Conlusions and Future Directions
+
+Regarding the specifications presented in the previous section, we successfully implemented the first and second phases. However, although implemented, the third phase still has some bugs that must be fixed.
+
+Potential optimizations that can be implemented are as follows:
+- optimization of some mathematical calculations performed within the smart contract (e.g., calculation of powers in modulus);
+- increase in the number of voters;
+- enabling the use of bigger cryptographical parameters.
+
 ## References
 
 1. [On Secure E-Voting over Blockchain](https://dl.acm.org/doi/pdf/10.1145/3461461)
@@ -28,4 +44,4 @@ The technical challenges we expect to face concern the development of an e-votin
 
 ## Demo
 
-An interactive demo of the application is deployed at the following [link](https://dao-proposal-group-6.fly.dev/).
+An interactive mock-up of the application is deployed at the following [link](https://dao-proposal-group-6.fly.dev/).

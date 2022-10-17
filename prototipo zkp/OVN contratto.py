@@ -42,16 +42,13 @@ def mult_mod(a,b, mod):
 
 def pow_mod(base, exp, mod):
     res = 1
-    if exp==0 :
-        return res
     while exp > 0:
         if (exp %2) == 1:
             res = mult_mod(res, base, mod)
-        else:
-            base = mult_mod(base, base, mod)
-        exp = exp>>1
+        base = mult_mod(base, base, mod)
+        exp = exp / 2
         print(res)
-    return mult_mod(res,base, mod)
+    return res
 
 def inverso_mod(b,mod):
     a= mod
@@ -80,24 +77,23 @@ def inverso_mod(b,mod):
 """Funzione chiamata con i parametri passati dal partecipante
    Verifica che il partecipante i-esimo effettivamente conosce un segreto x_i
    Successivamente salva il valore di claimId come identità dell' i-esimo partecipante """
-def verifyR1(i,claimId, claimRnd, proof):
-    chal = int(hashlib.sha256(str([gen,i, claimId, claimRnd]).encode('utf-8')).hexdigest(), 16) % q
+def verifyR1(claimId, claimRnd, proof):
+    chal = int(hashlib.sha256(str([gen, claimId, claimRnd]).encode('utf-8')).hexdigest(), 16) % q
     if (mult_mod(pow_mod(gen, proof, p) , pow_mod(claimId, chal, p), p) == claimRnd):
-        id[i] = claimId
         return True
     else:
         return False
 
-def verifyR2(i,commit, key, voto, a1, b1, a2, b2, d1, r1, d2, r2):
-    chal = int(hashlib.sha256(str([i,commit, key, voto, a1, b1, a2, b2]).encode('utf-8')).hexdigest(), 16) % q
+def verifyR2(index, commit, key, voto, a1, b1, a2, b2, d1, r1, d2, r2):
+    chal = int(hashlib.sha256(str([index, commit, key, voto, a1, b1, a2, b2]).encode('utf-8')).hexdigest(), 16) % q
     check1 = (chal == add_mod(d1 ,d2, q) )
-    check2 = (a1 == mult_mod( pow_mod(gen, r1, p) , pow_mod(commit, d1, p) , p) )
+    check2 = (a1 == mult_mod(pow_mod(gen, r1, p) , pow_mod(commit, d1, p) , p) )
     check3 = (a2 == mult_mod(pow_mod(gen, r2, p), pow_mod(commit, d2, p),p))
     check4 = (b1 == mult_mod(pow_mod(key, r1, p), pow_mod(voto, d1, p), p))
     check5 = (b2 == mult_mod(pow_mod(key, r2, p) , pow_mod(mult_mod(voto,inverso_mod(gen,p),p), d2, p) , p))
     print(check1, check2, check3, check4, check5)
     if (check1 and check2 and check3 and check4 and check5):
-        voti[i] = voto
+
         return True
     else:
         return False
@@ -114,3 +110,6 @@ def conta_voti():
         testTot = mult_mod(testTot, gen, p)
         if testTot == tot:
             return j+1
+
+if __name__ == "__main__":
+    pass

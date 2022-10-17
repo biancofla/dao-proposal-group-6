@@ -19,18 +19,11 @@ def approval_program():
 
     get_vote_of_sender = App.localGetEx(Int(0), App.id(), Bytes("voted"))
 
-    on_closeout = Seq([
-        get_vote_of_sender,
-        If(
-            And(
-                Global.round() <= App.globalGet(Bytes("VoteEnd")),
-                get_vote_of_sender.hasValue()
-            ),
-            App.globalPut(
-                get_vote_of_sender.value(), 
-                App.globalGet(get_vote_of_sender.value()) - Int(1)
-            )
+    on_show_results = Seq([
+        Assert(
+            Global.latest_timestamp() >= App.globalGet(Bytes("VoteEnd"))
         ),
+        count_votes(),
         Return(Int(1))
     ])
 
@@ -46,41 +39,68 @@ def approval_program():
                 )
             )
         ),
-        #App.globalPut(
-        #    Bytes("CurrentIndex"), 
-        #    App.globalGet(Bytes("CurrentIndex")) + Int(1)
-        #),
-        #App.globalPut(
-        #    App.globalGet(Bytes("CurrentIndex")), 
-        #    Txn.application_args[0]
-        #),
+        App.globalPut(
+            Bytes("CurrentIndex"), 
+            App.globalGet(Bytes("CurrentIndex")) + Int(1)
+        ),
+        App.globalPut(
+            Itob(App.globalGet(Bytes("CurrentIndex"))), 
+            Btoi(Txn.application_args[0])
+        ),
+        App.localPut(
+            Txn.sender(),
+            Bytes("Index"),
+            App.globalGet(Bytes("CurrentIndex"))
+        ),
         Return(Int(1))
     ])
 
-    choice = Txn.application_args[1]
-    choice_tally = App.globalGet(choice)
+    opup = OpUp(OpUpMode.OnCall)
     on_vote = Seq([
+        opup.maximize_budget(Int(3000)),
         Assert(
             And(
                 Global.latest_timestamp() >= App.globalGet(Bytes("VoteBegin")),
-                Global.latest_timestamp() <= App.globalGet(Bytes("VoteEnd"))
+                Global.latest_timestamp() <= App.globalGet(Bytes("VoteEnd")),
+                verify_r2(
+                    Btoi(Txn.application_args[1] ), 
+                    Btoi(Txn.application_args[2] ), 
+                    Btoi(Txn.application_args[3] ),
+                    Btoi(Txn.application_args[4] ),
+                    Btoi(Txn.application_args[5] ),
+                    Btoi(Txn.application_args[6] ),
+                    Btoi(Txn.application_args[7] ),
+                    Btoi(Txn.application_args[8] ), 
+                    Btoi(Txn.application_args[9] ), 
+                    Btoi(Txn.application_args[10]),
+                    Btoi(Txn.application_args[11]),
+                    Btoi(Txn.application_args[12]),
+                    Btoi(Txn.application_args[13])
+                )
             )
         ),
-        get_vote_of_sender,
-        If(get_vote_of_sender.hasValue(), Return(Int(0))),
-        App.globalPut(choice, choice_tally + Int(1)),
-        App.localPut(Int(0), Bytes("voted"), choice),
+        App.globalPut(
+            Concat(Bytes("Vote_"), Txn.application_args[1]),
+            Btoi(Txn.application_args[5])
+        ),
+        #get_vote_of_sender,
+        #If(get_vote_of_sender.hasValue(), Return(Int(0))),
+        #App.globalPut(choice, choice_tally + Int(1)),
+        #App.localPut(Int(0), Bytes("voted"), choice),
         Return(Int(1))
     ])
 
-    program = Cond(
-        [Txn.application_id() == Int(0), on_creation],
-        [Txn.on_completion() == OnComplete.DeleteApplication, Return(is_creator)],
-        [Txn.on_completion() == OnComplete.UpdateApplication, Return(is_creator)],
-        [Txn.on_completion() == OnComplete.CloseOut, on_closeout],
-        [Txn.on_completion() == OnComplete.OptIn, on_register],
-        [Txn.application_args[0] == Bytes("vote"), on_vote]
-    )
+    program = Seq([
+        Cond(
+            [Txn.application_id() == Int(0), on_creation],
+            [Txn.on_completion() == OnComplete.DeleteApplication, Return(is_creator)],
+            [Txn.on_completion() == OnComplete.UpdateApplication, Return(is_creator)],
+            [Txn.on_completion() == OnComplete.OptIn, on_register],
+            [Txn.application_args[0] == Bytes("vote"), on_vote],
+            [Txn.application_args[0] == Bytes("results"), on_show_results],
+        )
+    ])
+
     return program
 
 def clear_state_program():
@@ -89,13 +109,13 @@ def clear_state_program():
         get_vote_of_sender,
         If(
             And(
-                Global.round() <= App.globalGet(Bytes("VoteEnd")), 
+                Global.latest_timestamp() <= App.globalGet(Bytes("VoteEnd")), 
                 get_vote_of_sender.hasValue()
             ),
             App.globalPut(
                 get_vote_of_sender.value(), 
                 App.globalGet(get_vote_of_sender.value()) - Int(1)
-            )
+            ),
         ),
         Return(Int(1))
     ])
@@ -163,9 +183,11 @@ def pow_mod(base, exp, mod):
             If(
                Eq(exp_.load() % Int(2), Int(1))
             ).Then(
-               res.store(mult_mod(res.load(), base_.load(), mod))
+               #res.store(mult_mod(res.load(), base_.load(), mod))
+               res.store((res.load() * base_.load()) % mod)
             ),
-            base_.store(mult_mod(base_.load(), base_.load(), mod)),
+            #base_.store(mult_mod(base_.load(), base_.load(), mod)),
+            base_.store((base_.load() * base_.load()) % mod),
             exp_.store(Div(exp_.load(), Int(2)))
         ),
         Return(res.load())
@@ -242,11 +264,12 @@ def verify_r1(claim_id, claim_rnd, proof):
 
     return Seq([
         chal.store(
-            Btoi(Sha256(Concat(gen, Itob(claim_id), Itob(claim_rnd)))) % q
+            Btoi(Substring(Sha256(Concat(Itob(gen), Itob(claim_id), Itob(claim_rnd))), Int(0), Int(7))) % q
         ),
         If(
             Eq(
-                mult_mod(pow_mod(gen, proof, p), pow_mod(claim_id, chal.load(), p), p),
+                #mult_mod(pow_mod(gen, proof, p), pow_mod(claim_id, chal.load(), p), p),
+                (pow_mod(gen, proof, p) * pow_mod(claim_id, chal.load(), p)) % p,
                 claim_rnd
             )
         ).Then(
@@ -256,12 +279,136 @@ def verify_r1(claim_id, claim_rnd, proof):
         )
     ])
 
+@Subroutine(TealType.uint64)
+def verify_r2(index, commit, key, vote, a_1, b_1, a_2, b_2, d_1, r_1, d_2, r_2, hash):
+    chal = ScratchVar(TealType.uint64)
+
+    p   = App.globalGet(Bytes("p"))
+    q   = App.globalGet(Bytes("q"))
+    gen = App.globalGet(Bytes("gen"))
+
+    return Seq([
+        chal.store(
+            Btoi(
+                Substring(
+                    Sha256(
+                        Concat(
+                            Itob(index), 
+                            Itob(commit), 
+                            Itob(key),
+                            Itob(vote), 
+                            Itob(a_1), 
+                            Itob(b_1), 
+                            Itob(a_2), 
+                            Itob(b_2)
+                        )
+                    ), 
+                    Int(0), 
+                    Int(7)
+                )
+            ) % q
+        ),
+        If(
+            And(
+                Eq(
+                    chal.load(), 
+                    (d_1 + d_2) % q
+                ),
+                Eq(
+                    a_1,
+                    (pow_mod(gen, r_1, p) * pow_mod(commit, d_1, p)) % p
+                ),
+                Eq(
+                    a_2,
+                    (pow_mod(gen, r_2, p) * pow_mod(commit, d_2, p)) % p
+                ),
+                Eq(
+                    b_1,
+                    (pow_mod(key, r_1, p) * pow_mod(vote, d_1, p)) % p
+                ),
+                Eq(
+                    b_2,
+                    (pow_mod(key, r_2, p) * pow_mod((vote * inverse_mod(gen, p)) % p, d_2, p)) % p
+                ),
+            )
+        ).Then(
+            Return(Int(1))
+        ).Else(
+            Return(Int(0))
+        )
+    ])
+
+@Subroutine(TealType.none)
+def count_votes():
+    tot      = ScratchVar(TealType.uint64)
+    votes    = ScratchVar(TealType.uint64)
+    test_tot = ScratchVar(TealType.uint64)
+
+    p   = App.globalGet(Bytes("p"))
+    gen = App.globalGet(Bytes("gen"))
+
+    current_index = App.globalGet(Bytes("CurrentIndex"))
+    
+    i = ScratchVar(TealType.uint64)
+    j = ScratchVar(TealType.uint64)
+    return Seq([
+        tot.store(Int(1)),
+        For(
+            i.store(Int(0)),
+            Lt(i.load(), current_index),
+            i.store(i.load() + Int(1))
+        ).Do(
+            votes.store(
+                App.globalGet(
+                    Concat(Bytes("Vote_"), Itob(i.load()))
+                )
+            ),
+            tot.store(
+                (tot.load() * votes.load()) % p
+            )
+        ),
+        test_tot.store(Int(1)),
+        If(
+            Eq(test_tot.load(), tot.load())
+        ).Then(
+            Seq([
+                App.globalPut(
+                    Bytes("Results"),
+                    tot.load()
+                ),
+                #Return(Int(1))
+            ])
+        ).Else(
+            For(
+                j.store(Int(0)),
+                Lt(j.load(), current_index),
+                j.store(j.load() + Int(1))
+            ).Do(
+                test_tot.store(
+                    (test_tot.load() * gen) % p
+                ),
+                If(
+                    Eq(test_tot.load(), tot.load())
+                ).Then(
+                    Seq([
+                        App.globalPut(
+                            Bytes("Results"),
+                            j.load() + Int(1)
+                        ),
+                        #Return(Int(1))
+                    ]) 
+                )
+            )
+        ),
+        #Return(Int(0))
+    ])
+
 if __name__ == "__main__":
     with open('vote_approval.teal', 'w') as f:
         compiled = compileTeal(
             approval_program(), 
             Mode.Application,
-            version=4
+            version=6
         )
         f.write(compiled)
 
@@ -269,6 +416,6 @@ if __name__ == "__main__":
         compiled = compileTeal(
             clear_state_program(), 
             Mode.Application,
-            version=4
+            version=6
         )
         f.write(compiled)

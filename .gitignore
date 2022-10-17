@@ -12,3 +12,5 @@ fly.toml
 
 # Editor-specific configuration
 .vscode
+
+*.txt

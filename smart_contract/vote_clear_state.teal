@@ -1,11 +1,11 @@
-#pragma version 4
+#pragma version 6
 int 0
 global CurrentApplicationID
 byte "voted"
 app_local_get_ex
 store 1
 store 0
-global Round
+global LatestTimestamp
 byte "VoteEnd"
 app_global_get
 <=

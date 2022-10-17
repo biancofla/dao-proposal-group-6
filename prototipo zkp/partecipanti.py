@@ -13,13 +13,12 @@ n = 5 #totale partecipanti
 
 """Parte fatta in autonomia da un partecipante per il round 1"""
 x = randint(1, q - 1)
-gX = pow(g, x, p)
+gX = pow(g, x, p) # ID
 rnd = randint(1, q - 1)
 gRnd = pow(g, rnd, p)
 xChal = int(hashlib.sha256(str([g, i, gX, gRnd]).encode('utf-8')).hexdigest(), 16) % q
 xProof = (rnd - xChal * x) % (q)
 """Fa calcolare al contratto verifyR1( i, gX, xChal, xProof)"""
-
 
 """Dopo che tutti hanno fatto il round 1, si recupera i loro valore gX1, gX2, ..., gXn, e li salva in un vettore"""
 id = [randint(1, p) for i in range(0,n)]
